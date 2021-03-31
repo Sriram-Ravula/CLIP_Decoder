@@ -1,0 +1,32 @@
+num_nodes: 1
+gpus: 1
+distributed_backend: "ddp"
+
+#model parameters
+decoder: "resnet-small"
+ngf: 128
+nz: 512 #this will be 512 for "ViT" or 1024 for RN50
+clip_model: "ViT-B/32" #"ViT-B/32" or "RN50"
+
+device: "cuda"
+
+#dataset stuff
+dataset: "Imagenet"
+batch_size: 40
+workers: 12
+
+#experiment controls
+seed: 1234
+experiment_name: "Dogs_Small_Vit"
+
+#optimization params
+lr: 0.0005
+loss: "mse"
+
+#training
+max_epochs: 2000
+log_save_interval: 5 #set this to be equal to num_epochs if row_log_interval is 1
+row_log_interval: 1  
+
+#validation
+check_val_every_n_epoch: 2
