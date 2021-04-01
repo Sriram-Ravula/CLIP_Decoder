@@ -33,10 +33,10 @@ class ImageNet_Train:
         self.rescale = Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
 
         self.transform = Compose([
-            RandomResizedCrop(224), #Uncomment this and comment the next two lines for some real ish 
-            #Resize(256),
-            #CenterCrop(224),
-            RandomHorizontalFlip(),
+            #RandomResizedCrop(224), #Uncomment this and comment the next two lines for some real ish 
+            Resize(256),
+            CenterCrop(224),
+            #RandomHorizontalFlip(),
             ToTensor()
         ])
     

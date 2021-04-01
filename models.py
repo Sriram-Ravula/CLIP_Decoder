@@ -178,9 +178,9 @@ class ResnetGenerator(nn.Module):
             #Input: [8*ngf, 28, 28]
             ResBlockGenerator(8*ngf, 4*ngf, stride=2),
             #Input: [4*ngf, 56, 56]
+            #NLBlockND(in_channels=4*ngf, dimension=2),
             ResBlockGenerator(4*ngf, 2*ngf, stride=2),
             #Input: [2*ngf, 112, 112]
-            NLBlockND(in_channels=2*ngf, dimension=2),
             ResBlockGenerator(2*ngf, ngf, stride=2),
             #Input: [ngf, 224, 224]
             nn.BatchNorm2d(ngf),

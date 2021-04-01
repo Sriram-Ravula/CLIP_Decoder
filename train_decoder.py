@@ -44,7 +44,6 @@ class Clip_decoder(LightningModule):
             self.decoder = ResnetGenerator_small(nz=args.nz, ngf=args.ngf)
         
         #The CLIP model which does images --> img_embeddings
-        #self.clip = clip.load(args.clip_model, device=args.device, jit=False)[0].eval() TODO uncomment
         self.embedding_layer = Produce_Embeddings(args)
         
         #The mean and std of the CLIP model
@@ -52,10 +51,9 @@ class Clip_decoder(LightningModule):
         self.std = torch.tensor([0.26862954, 0.26130258, 0.27577711]).to(args.device)
 
         if args.dataset == "Imagenet":
-            #self.classes = [281, 282, 283, 284, 285] #Cats
+            self.classes = [281, 282, 283, 284, 285] #Cats
             #self.classes = np.arange(151, 269).tolist() #Dogs
-            self.classes = np.arange(200, 220) #Dogs small
-            self.data_path = "/home/sriram/Projects/Datasets/Imagenet/ILSVRC/Data/CLS-LOC/"
+            #self.classes = np.arange(200, 220) #Dogs small
         
         if args.loss == "lpips":
             #self.criterion = lpips.LPIPS(net='vgg')
@@ -70,10 +68,6 @@ class Clip_decoder(LightningModule):
         """
         Given an image(s) x, get the clip image embeddings and then pass them through the decoder.
         """
-        # with torch.no_grad(): TODO uncomment
-        #     img_embeddings = self.clip.encode_image(x).float()
-        #     img_embeddings /= img_embeddings.norm(dim=-1, keepdim=True)
-
         img_embeddings = self.embedding_layer.get_embeddings(x)
         
         return self.decoder(img_embeddings)
@@ -151,10 +145,15 @@ class Clip_decoder(LightningModule):
         """
         Returns a training dataloader - only ImageNet supported for now
         """
-        train_dataset = torchvision.datasets.ImageNet(
-            root = self.data_path,
-            split = "train",
+        if "small" in self.hparams.decoder:
             transform = ImageNet_Train_Downsample()
+        else:
+            transform = ImageNet_Train()
+
+        train_dataset = torchvision.datasets.ImageNet(
+            root = self.hparams.data_path,
+            split = "train",
+            transform = transform
         )
 
         inds_train = [i for i, label in enumerate(train_dataset.targets) if label in self.classes]
@@ -168,15 +167,18 @@ class Clip_decoder(LightningModule):
         """
         Returns a validation dataloader
         """
-        val_dataset = torchvision.datasets.ImageNet(
-            root = self.data_path,
-            split = "val",
+        if "small" in self.hparams.decoder:
             transform = ImageNet_Train_Downsample()
+        else:
+            transform = ImageNet_Val()
+
+        val_dataset = torchvision.datasets.ImageNet(
+            root = self.hparams.data_path,
+            split = "val",
+            transform = transform
         )
 
         inds_val = [i for i, label in enumerate(val_dataset.targets) if label in self.classes]
-
-        #self.N_val = len(inds_val)
         
         val_dataloader = DataLoader(Subset(val_dataset, inds_val), batch_size=self.hparams.batch_size, num_workers=self.hparams.workers,\
                                         pin_memory=True, shuffle=False)
