@@ -78,22 +78,6 @@ class Clip_decoder(LightningModule):
         
         return self.decoder(img_embeddings)
     
-    def unnormalize(self, x, lpips=False):
-        """
-        Given an image that has been normalised, unnormalise it to range [0, 1].
-        If unnormalising for LPIPs score, also scale to [-1, 1]
-        """
-        x *= self.std[:, None, None]
-        x += self.mean[:, None, None]
-
-        if lpips:
-            x -= torch.tensor([0.5, 0.5, 0.5]).type_as(x)[:, None, None]
-            x /= torch.tensor([0.5, 0.5, 0.5]).type_as(x)[:, None, None]
-
-            x = torch.clamp(x, -1, 1)
-        
-        return x
-    
     def configure_optimizers(self):
         """
         Returns an optimizer for the decoder.
@@ -112,8 +96,6 @@ class Clip_decoder(LightningModule):
         x_hat = self.forward(x[0])
         
         if self.hparams.loss == "lpips":
-            #x_normed = self.unnormalize(x, lpips=True)
-            #x_hat_normed = self.unnormalize(x_hat, lpips=True)
             loss = self.criterion(x[1], x_hat).mean()
         else:
             loss = self.criterion(x[1], x_hat)
@@ -137,8 +119,6 @@ class Clip_decoder(LightningModule):
         x_hat = self.forward(x[0])
 
         if self.hparams.loss == "lpips":
-            #x_normed = self.unnormalize(x, lpips=True)
-            #x_hat_normed = self.unnormalize(x_hat, lpips=True)
             loss = self.criterion(x[1], x_hat).mean()
         else:
             loss = self.criterion(x[1], x_hat)
