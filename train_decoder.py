@@ -134,7 +134,7 @@ class Clip_decoder(LightningModule):
         }
 
         output = {
-            'val_loss': val_loss_mean,
+            'val_loss_meaningless': val_loss_mean,
             'log': loss_dict,
             'progress_bar': loss_dict
         }
